@@ -30,11 +30,6 @@ class UIController {
         
         // State
         this.currentAudioBlob = null;
-
-        // Error notification
-        this.errorToast = document.createElement('div');
-        this.errorToast.className = 'error-toast hidden';
-        document.body.appendChild(this.errorToast);
     }
 
     setupEventListeners() {
@@ -79,56 +74,27 @@ class UIController {
         }
     }
 
-    validateFile(file) {
-        // Check if file is provided
-        if (!file) {
-            return { valid: false, error: 'No file selected.' };
-        }
-        
-        // Check if the file is audio
-        if (!file.type.startsWith('audio/')) {
-            return { valid: false, error: 'Please select an audio file (.wav, .mp3, or .ogg).' };
-        }
-        
-        // Check file extension
-        const validExtensions = ['wav', 'mp3', 'ogg'];
-        const extension = file.name.split('.').pop().toLowerCase();
-        if (!validExtensions.includes(extension)) {
-            return { valid: false, error: `Invalid file type. Allowed types: ${validExtensions.join(', ')}` };
-        }
-        
-        // Check file size (max 10MB)
-        const maxSize = 10 * 1024 * 1024; // 10MB
-        if (file.size > maxSize) {
-            return { 
-                valid: false, 
-                error: `File too large. Maximum size is ${maxSize / (1024 * 1024)}MB.` 
-            };
-        }
-        
-        return { valid: true };
-    }
-
     handleFileSelection(file) {
-        const validation = this.validateFile(file);
-        
-        if (!validation.valid) {
-            this.showToast(validation.error, 'error');
-            return;
-        }
+        if (file) {
+            // Check if the file is audio
+            if (!file.type.startsWith('audio/')) {
+                alert('Please select an audio file (.wav or .mp3)');
+                return;
+            }
             
-        this.fileNameDisplay.textContent = file.name;
-        
-        // Create blob URL for preview
-        const blobUrl = URL.createObjectURL(file);
-        this.audioPlayer.src = blobUrl;
-        this.audioPreview.classList.remove('hidden');
-        
-        // Store the file as blob
-        this.currentAudioBlob = file;
-        
-        // Reset results when new file is selected
-        this.resetResults();
+            this.fileNameDisplay.textContent = file.name;
+            
+            // Create blob URL for preview
+            const blobUrl = URL.createObjectURL(file);
+            this.audioPlayer.src = blobUrl;
+            this.audioPreview.classList.remove('hidden');
+            
+            // Store the file as blob
+            this.currentAudioBlob = file;
+            
+            // Reset results when new file is selected
+            this.resetResults();
+        }
     }
 
     handleAudioCapture(audioBlob) {
@@ -209,19 +175,6 @@ class UIController {
         this.translationContent.innerHTML = `
             <p class="placeholder">No translation available</p>
         `;
-        
-        // Show toast notification
-        this.showToast(message, 'error');
-    }
-    
-    showToast(message, type = 'info') {
-        this.errorToast.textContent = message;
-        this.errorToast.className = `toast ${type}-toast`;
-        
-        // Auto hide after 5 seconds
-        setTimeout(() => {
-            this.errorToast.classList.add('hidden');
-        }, 5000);
     }
 }
 

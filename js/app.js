@@ -17,12 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const audioBlob = await recorder.stop();
             if (audioBlob) {
-                // Validate audio duration (max 2 minutes)
-                const audioDuration = await getAudioDuration(audioBlob);
-                if (audioDuration > 120) { // 120 seconds = 2 minutes
-                    uiController.showError("Recording is too long. Maximum duration is 2 minutes.");
-                    return;
-                }
                 uiController.handleAudioCapture(audioBlob);
             }
         } else {
@@ -47,20 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Setup submit button
     const submitButton = document.getElementById('submitAudioButton');
-    
-    // Add debouncing to prevent multiple rapid submissions
-    let isSubmitting = false;
-    
     submitButton.addEventListener('click', async () => {
-        if (isSubmitting) {
-            return;
-        }
-        
         if (uiController.currentAudioBlob) {
-            isSubmitting = true;
-            submitButton.disabled = true;
-            submitButton.textContent = 'Processing...';
-            
             uiController.showLoader();
             try {
                 const results = await apiService.transcribeAudio(uiController.currentAudioBlob);
@@ -69,12 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 uiController.showError(error.message || 'Failed to process audio');
             } finally {
                 uiController.hideLoader();
-                isSubmitting = false;
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<span class="icon">📤</span> Process Audio';
             }
         } else {
-            uiController.showError('Please record or upload an audio file first');
+            alert('Please record or upload an audio file first');
         }
     });
     
@@ -83,22 +62,3 @@ document.addEventListener('DOMContentLoaded', () => {
         recorder.cleanup();
     });
 });
-
-// Helper function to get audio duration
-async function getAudioDuration(audioBlob) {
-    return new Promise((resolve) => {
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        
-        audio.addEventListener('loadedmetadata', () => {
-            const duration = audio.duration;
-            URL.revokeObjectURL(audioUrl);
-            resolve(duration);
-        });
-        
-        audio.addEventListener('error', () => {
-            URL.revokeObjectURL(audioUrl);
-            resolve(0); // Default to 0 on error
-        });
-    });
-}
