@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Indic Language Assistant</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Indic Language Assistant</h1>
+            <p>Record or upload audio to transcribe, identify, and translate Indic languages</p>
+        </header>
+        
+        <main>
+            <section class="audio-input">
+                <div class="tabs">
+                    <button id="recordTab" class="tab-btn active">Record Audio</button>
+                    <button id="uploadTab" class="tab-btn">Upload Audio</button>
+                </div>
+                
+                <div id="recordContent" class="tab-content active">
+                    <div class="recorder-controls">
+                        <button id="recordButton" class="btn primary">
+                            <span class="icon">🎤</span> Start Recording
+                        </button>
+                        <div id="recordingIndicator" class="recording-indicator hidden">
+                            <div class="pulse"></div>
+                            <span>Recording...</span>
+                        </div>
+                        <div id="recordingTime" class="recording-time">00:00</div>
+                    </div>
+                </div>
+                
+                <div id="uploadContent" class="tab-content">
+                    <div class="file-upload">
+                        <label for="audioFileInput" class="upload-area">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">
+                                <p>Drag and drop your audio file or click to browse</p>
+                                <p class="small">Supports .wav and .mp3 formats</p>
+                            </div>
+                        </label>
+                        <input type="file" id="audioFileInput" accept=".wav,.mp3" class="hidden">
+                        <p id="fileNameDisplay" class="file-name">No file chosen</p>
+                    </div>
+                </div>
+                
+                <div class="audio-preview hidden" id="audioPreview">
+                    <h3>Audio Preview</h3>
+                    <audio id="audioPlayer" controls></audio>
+                    <button id="submitAudioButton" class="btn accent">
+                        <span class="icon">📤</span> Process Audio
+                    </button>
+                </div>
+            </section>
+            
+            <section class="results hidden" id="resultsSection">
+                <div class="loader" id="processingLoader">
+                    <div class="spinner"></div>
+                    <p>Processing audio...</p>
+                </div>
+                
+                <div class="result-cards" id="resultCards">
+                    <div class="card" id="transcriptionCard">
+                        <div class="card-header">
+                            <h3>Transcription</h3>
+                        </div>
+                        <div class="card-content" id="transcriptionContent">
+                            <p class="placeholder">Submit audio to see transcription</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card" id="languageCard">
+                        <div class="card-header">
+                            <h3>Language Classification</h3>
+                        </div>
+                        <div class="card-content" id="languageContent">
+                            <p class="placeholder">Submit audio to detect language</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card" id="translationCard">
+                        <div class="card-header">
+                            <h3>Translation</h3>
+                        </div>
+                        <div class="card-content" id="translationContent">
+                            <p class="placeholder">Submit audio to see translation</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Indic Language Assistant © 2025</p>
+        </footer>
+    </div>
+
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
