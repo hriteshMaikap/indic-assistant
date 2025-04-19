@@ -4,7 +4,6 @@ from gradio_client import Client
 import os
 import tempfile
 import random
-import json
 
 app = Flask(__name__)
 CORS(app)
@@ -28,17 +27,12 @@ def transcribe():
     audio_file.save(temp_path)
     
     try:
-        # Create the file data structure that Gradio expects
+        # Create a FileData structure as expected by Gradio
         file_data = {
             "path": temp_path,
-            "orig_name": audio_file.filename,
-            "size": os.path.getsize(temp_path),
-            "mime_type": "audio/wav",
-            "is_stream": False,
             "meta": {"_type": "gradio.FileData"}
         }
         
-        # Call the API to transcribe
         result = client.predict(
             file_data,
             api_name="/predict"
