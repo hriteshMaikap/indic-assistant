@@ -3,16 +3,13 @@ from flask_cors import CORS
 from gradio_client import Client
 import os
 import tempfile
-import random
+from classifier_inference import predict_language
 
 app = Flask(__name__)
 CORS(app)
 
 # Initialize the Gradio client
 client = Client("hriteshMaikap/marathi-asr-wav2vec2bert")
-
-# List of supported Indic languages
-LANGUAGES = ["Hindi", "Marathi", "Bengali", "Tamil", "Telugu"]
 
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
@@ -27,28 +24,50 @@ def transcribe():
     audio_file.save(temp_path)
     
     try:
-        # Create a FileData structure as expected by Gradio
-        file_data = {
-            "path": temp_path,
-            "meta": {"_type": "gradio.FileData"}
-        }
+        # Check if the file is WAV format
+        is_wav = audio_file.filename.lower().endswith('.wav')
         
-        result = client.predict(
-            file_data,
-            api_name="/predict"
-        )
+        if is_wav:
+            # Bypass language classification for WAV files
+            pred_lang = "Marathi"
+            confidence = 1.0
+            probabilities = {
+                "Marathi": 1.0,
+                "Hindi": 0.0,
+                "Bengali": 0.0,
+                "Tamil": 0.0,
+                "Telugu": 0.0
+            }
+        else:
+            # For non-WAV files, perform normal language classification
+            audio_file.seek(0)  # Reset file pointer
+            pred_lang, confidence, probabilities = predict_language(audio_file)
         
-        # In a real application, we would use a proper language detection model
-        # For demo purposes, we're using a simple simulation
-        detected_language = random.choice(LANGUAGES)
-        
-        # Placeholder for translation
-        translation = f"This is a simulated translation of the transcribed text (detected as {detected_language})"
+        # Only proceed with transcription if the language is Marathi
+        if pred_lang.lower() == 'marathi':
+            # Create the file data structure that Gradio expects
+            file_data = {
+                "path": temp_path,
+                "orig_name": audio_file.filename,
+                "size": os.path.getsize(temp_path),
+                "mime_type": "audio/wav",
+                "is_stream": False,
+                "meta": {"_type": "gradio.FileData"}
+            }
+            
+            # Call the API to transcribe
+            transcription = client.predict(
+                file_data,
+                api_name="/predict"
+            )
+        else:
+            transcription = "Transcription not available - System only supports Marathi transcription"
         
         return jsonify({
-            "transcription": result,
-            "detected_language": detected_language,
-            "translation": translation
+            "transcription": transcription,
+            "detected_language": pred_lang,
+            "confidence": confidence,
+            "language_probabilities": probabilities
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500

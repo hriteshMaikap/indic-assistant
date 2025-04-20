@@ -133,19 +133,30 @@ class UIController {
             <p>${results.transcription || 'No transcription available'}</p>
         `;
         
-        // Update language detection with animation
+        // Update language detection with confidence
         this.languageContent.innerHTML = `
             <div class="language-result">
                 <p>Detected Language:</p>
                 <div class="detected-language">${results.detected_language}</div>
-                <p>Confidence: High</p>
+                <p>Confidence: ${(results.confidence * 100).toFixed(2)}%</p>
+                <div class="language-probabilities">
+                    ${Object.entries(results.language_probabilities)
+                        .map(([lang, prob]) => `
+                            <div class="probability-bar">
+                                <span class="lang-name">${lang}</span>
+                                <div class="bar">
+                                    <div class="fill" style="width: ${prob * 100}%"></div>
+                                </div>
+                                <span class="prob-value">${(prob * 100).toFixed(1)}%</span>
+                            </div>
+                        `).join('')}
+                </div>
             </div>
         `;
         
-        // Update translation
-        this.translationContent.innerHTML = `
-            <p>${results.translation || 'No translation available'}</p>
-        `;
+        // Remove translation card since we're not using it anymore
+        this.translationContent.innerHTML = '';
+        this.translationContent.parentElement.style.display = 'none';
         
         // Apply fade-in animation to cards
         const cards = this.resultCards.querySelectorAll('.card');
@@ -172,9 +183,8 @@ class UIController {
             <p class="placeholder">No language detected</p>
         `;
         
-        this.translationContent.innerHTML = `
-            <p class="placeholder">No translation available</p>
-        `;
+        this.translationContent.innerHTML = '';
+        this.translationContent.parentElement.style.display = 'none';
     }
 }
 
