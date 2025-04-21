@@ -112,6 +112,7 @@ class UIController {
         this.transcriptionContent.innerHTML = '<p class="placeholder">Submit audio to see transcription</p>';
         this.languageContent.innerHTML = '<p class="placeholder">Submit audio to detect language</p>';
         this.translationContent.innerHTML = '<p class="placeholder">Submit audio to see translation</p>';
+        this.translationContent.parentElement.style.display = 'block';
     }
 
     showLoader() {
@@ -154,9 +155,14 @@ class UIController {
             </div>
         `;
         
-        // Remove translation card since we're not using it anymore
-        this.translationContent.innerHTML = '';
-        this.translationContent.parentElement.style.display = 'none';
+        // Update translation
+        this.translationContent.parentElement.style.display = 'block';
+        this.translationContent.innerHTML = `
+            <div class="translation-result">
+                <p>English Translation:</p>
+                <p class="translation-text">${results.translation || 'Translation not available'}</p>
+            </div>
+        `;
         
         // Apply fade-in animation to cards
         const cards = this.resultCards.querySelectorAll('.card');
@@ -183,8 +189,10 @@ class UIController {
             <p class="placeholder">No language detected</p>
         `;
         
-        this.translationContent.innerHTML = '';
-        this.translationContent.parentElement.style.display = 'none';
+        this.translationContent.innerHTML = `
+            <p class="placeholder">Translation not available</p>
+        `;
+        this.translationContent.parentElement.style.display = 'block';
     }
 }
 

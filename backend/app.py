@@ -4,6 +4,7 @@ from gradio_client import Client
 import os
 import tempfile
 from classifier_inference import predict_language
+from translation import translate_to_english
 
 app = Flask(__name__)
 CORS(app)
@@ -27,8 +28,12 @@ def transcribe():
         # Check if the file is WAV format
         is_wav = audio_file.filename.lower().endswith('.wav')
         
-        if is_wav:
-            # Bypass language classification for WAV files
+        if not is_wav:
+            # For non-WAV files, perform language classification
+            audio_file.seek(0)  # Reset file pointer
+            pred_lang, confidence, probabilities = predict_language(audio_file)
+        else:
+            # For WAV files, bypass classification and set as Marathi
             pred_lang = "Marathi"
             confidence = 1.0
             probabilities = {
@@ -38,12 +43,8 @@ def transcribe():
                 "Tamil": 0.0,
                 "Telugu": 0.0
             }
-        else:
-            # For non-WAV files, perform normal language classification
-            audio_file.seek(0)  # Reset file pointer
-            pred_lang, confidence, probabilities = predict_language(audio_file)
         
-        # Only proceed with transcription if the language is Marathi
+        # Only proceed with transcription and translation if the language is Marathi
         if pred_lang.lower() == 'marathi':
             # Create the file data structure that Gradio expects
             file_data = {
@@ -60,11 +61,16 @@ def transcribe():
                 file_data,
                 api_name="/predict"
             )
+            
+            # Get English translation
+            translation = translate_to_english(transcription)
         else:
             transcription = "Transcription not available - System only supports Marathi transcription"
+            translation = "Translation not available"
         
         return jsonify({
             "transcription": transcription,
+            "translation": translation,
             "detected_language": pred_lang,
             "confidence": confidence,
             "language_probabilities": probabilities
