@@ -1,8 +1,17 @@
 from groq import Groq
 import os
+import dotenv
+
+# Load environment variables from .env file
+dotenv.load_dotenv()
+
+# Get API key from environment variables
+api_key = os.environ.get("GROQ_API_KEY")
+if not api_key:
+    raise ValueError("GROQ_API_KEY not found in environment variables")
 
 client = Groq(
-    api_key="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"
+    api_key=api_key
 )
 
 def translate_to_english(marathi_text):
